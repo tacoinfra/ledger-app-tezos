@@ -331,6 +331,7 @@ void parse_operations_init(struct parsed_operation_group *const out,
 #define STEP_OP_TYPE_DISPATCH                       10001
 #define STEP_AFTER_MANAGER_FIELDS                   10002
 #define STEP_HAS_DELEGATE                           10003
+#define STEP_HAS_LIMIT                              10004
 #define STEP_MICHELSON_FIRST_IS_PUSH                10010
 #define STEP_MICHELSON_FIRST_IS_NONE                10011
 #define STEP_MICHELSON_SECOND_IS_KEY_HASH           10012
@@ -441,7 +442,8 @@ static inline bool parse_byte(uint8_t byte,
                 case OPERATION_TAG_BABYLON_DELEGATION:
                 case OPERATION_TAG_BABYLON_ORIGINATION:
                 case OPERATION_TAG_BABYLON_REVEAL:
-                case OPERATION_TAG_BABYLON_TRANSACTION: {
+                case OPERATION_TAG_BABYLON_TRANSACTION:
+                case OPERATION_TAG_DEPOSITS_LIMIT: {
                     struct implicit_contract const *const implicit_source =
                         NEXT_TYPE(struct implicit_contract);
                     out->operation.source.originated = 0;
@@ -624,6 +626,22 @@ static inline bool parse_byte(uint8_t byte,
                 case OPERATION_TAG_BABYLON_ORIGINATION:
                     PARSE_ERROR();  // We can't parse the script yet, and all babylon originations
                                     // have a script; we have to just reject originations.
+
+	        case OPERATION_TAG_DEPOSITS_LIMIT:
+		    switch (state->op_step) {
+                       case STEP_OP_TYPE_DISPATCH: {
+                            uint8_t limit_present = NEXT_BYTE;
+
+                            OP_JMPIF(STEP_HAS_LIMIT, limit_present)
+			      }
+			        out->operation.flags = 0;
+				JMP_TO_TOP;  // These go back to the top to catch any reveals.
+                        case STEP_HAS_LIMIT: {
+			        out->operation.flags = 1;
+			        out->operation.amount = PARSE_Z;
+		       }
+			  JMP_TO_TOP;  // These go back to the top to catch any reveals.
+		    }
 
                 case OPERATION_TAG_ATHENS_TRANSACTION:
                 case OPERATION_TAG_BABYLON_TRANSACTION:

@@ -112,6 +112,8 @@ static bool is_operation_allowed(enum operation_tag tag) {
             return true;
         case OPERATION_TAG_BABYLON_TRANSACTION:
             return true;
+        case OPERATION_TAG_DEPOSITS_LIMIT:
+            return true;
 #endif
         default:
             return false;
@@ -325,6 +327,14 @@ bool prompt_transaction(struct parsed_operation_group const *const ops,
             ux_confirm_screen(ok, cxl);
         }
 
+        case OPERATION_TAG_DEPOSITS_LIMIT : {
+            init_screen_stack();
+	    push_ui_callback(ops->operation.flags?"Set":"Unset", copy_string, "Deposits limit");
+	    push_ui_callback("Fee", microtez_to_string_indirect, &ops->total_fee);
+	    push_ui_callback("Source", parsed_contract_to_string, &ops->operation.source);
+	    if (ops->operation.flags) push_ui_callback("Limit", microtez_to_string_indirect, &ops->operation.amount);
+            ux_confirm_screen(ok, cxl);
+    }
         case OPERATION_TAG_ATHENS_TRANSACTION:
         case OPERATION_TAG_BABYLON_TRANSACTION: {
             init_screen_stack();
