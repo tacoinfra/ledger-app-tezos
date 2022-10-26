@@ -192,78 +192,50 @@ The first thing you'll need to do is clone this repository:
 $ git clone https://github.com/obsidiansystems/ledger-app-tezos.git
 ```
 
-You will need to have the
-[BOLOS SDK](http://ledger.readthedocs.io/en/latest/userspace/getting_started.html)
-to use the Makefile, which can be cloned from Ledger's
-[nanos-secure-sdk](https://github.com/LedgerHQ/nanos-secure-sdk) git repository.
-You will also need to download two compilers for use with the SDK.
-Note that these are specialized compilers to cross-compile for the ARM-based
-platform of the Ledger device; please don't use the versions of `clang` and `gcc` that
-come with your system.
-
-  * [CLANG](http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.10.tar.xz)
-  * [GCC](https://launchpadlibrarian.net/251687888/gcc-arm-none-eabi-5_3-2016q1-20160330-linux.tar.bz2)
-
-All of the environment setup can be accomplished with the following commands.
-
-Obtain the BOLOS SDK and the compilers it needs:
-
-```
-$ git clone https://github.com/LedgerHQ/nanos-secure-sdk
-$ wget -O clang.tar.xz http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.10.tar.xz
-$ wget -O gcc.tar.bz2 https://launchpadlibrarian.net/251687888/gcc-arm-none-eabi-5_3-2016q1-20160330-linux.tar.bz2
-```
-
-Unzip the compilers and move them to appropriately-named directories:
-
-```
-$ mkdir bolos_env
-$ tar -xJf clang.tar.xz --directory bolos_env
-$ mv bolos_env/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.10 bolos_env/clang-arm-fropi
-$ tar -xjf gcc.tar.bz2 --directory bolos_env
-```
-
-Set environment variables:
-
-```
-$ export BOLOS_SDK=$PWD/nanos-secure-sdk
-$ export BOLOS_ENV=$PWD/bolos_env
-```
+Follow the instructions at https://developers.ledger.com/docs/nano-app/build/ to setup a docker container with which to build these applications.
 
 To build the Tezos Wallet app:
 
 ```
 $ APP=tezos_wallet make
-$ mv bin/app.hex wallet.hex
+$ docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
+root@be1d44cb0d36:/app# https://developers.ledger.com/docs/nano-app/build/^C
+root@be1d44cb0d36:/app# BOLOS_SDK=$NANOX_SDK make
+TARGET_NAME=TARGET_NANOX TARGET_ID=0x33000004 TARGET_VERSION=2.0.2
+BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH
+CLANGPATH is not set: clang will be used from PATH
+GCCPATH is not set: arm-none-eabi-* will be used from PATH
+Makefile:33: VERSION_TAG not checked
+Makefile:42: COMMIT not specified and could not be determined with git from ""
+BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH
+CLANGPATH is not set: clang will be used from PATH
+GCCPATH is not set: arm-none-eabi-* will be used from PATH
+Linker changed to CLANG
+>>>>> Building tezos_wallet at commit
 ```
-If this results in an error message that includes this line (possibly repeatedly):
-
+then, after quitting the docker shell,
 ```
-#include <bits/libc-header-start.h>
+$ sudo mv bin/app.hex wallet.hex
 ```
-you may need to run:
-
-```
-$ sudo apt-get install libc6-dev gcc-multilib g++-multilib
-```
-and then re-run the `make` command.
 
 Note that if you build *both* apps, you need to run `make clean` before building
-the second one. So, to build both apps run:
+the second one. So, after the above `sudo mv....`:
 
 ```
-$ APP=tezos_wallet make
-$ mv bin/app.hex wallet.hex
-$ make clean
-$ APP=tezos_baking make
-$ mv bin/app.hex baking.hex
-```
-
-To build just the Tezos Baking App:
-
-```
-$ APP=tezos_baking make
-$ mv bin/app.hex baking.hex
+$ docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
+root@ba4e58af1ff9:/app# BOLOS_SDK=$NANOX_SDK make clean
+TARGET_NAME=TARGET_NANOX TARGET_ID=0x33000004 TARGET_VERSION=2.0.2
+BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH
+CLANGPATH is not set: clang will be used from PATH
+GCCPATH is not set: arm-none-eabi-* will be used from PATH
+Makefile:33: VERSION_TAG not checked
+Makefile:42: COMMIT not specified and could not be determined with git from ""
+BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH
+CLANGPATH is not set: clang will be used from PATH
+GCCPATH is not set: arm-none-eabi-* will be used from PATH
+Linker changed to CLANG
+rm -fr obj bin debug dep src/glyphs.c src/glyphs.h
+root@ba4e58af1ff9:/app# BOLOS_SDK=$NANOX_SDK APP=baking_app make
 ```
 
 ### Installing the apps onto your Ledger device without Ledger Live
@@ -704,7 +676,7 @@ Originated accounts have names beginning with `KT1` rather than `tz1`, `tz2` or 
 
 ### Signing Michelson
 The wallet app allows you to sign packed Michelson values. This can be useful when interacting with a Michelson contract that
-uses `PACK` and `CHECK_SIGNATURE` (multisig contracts use this functionality). 
+uses `PACK` and `CHECK_SIGNATURE` (multisig contracts use this functionality).
 
 Here is an example:
 ```
@@ -1054,4 +1026,3 @@ If you install a Ledger application, such as Tezos Wallet or Tezos Baking, outsi
 You can email us at tezos@obsidian.systems and request to join our Slack.
 We have several channels about baking and one specifically for our Ledger applications.
 You can ask questions and get answers from Obsidian staff or from the community.
-
