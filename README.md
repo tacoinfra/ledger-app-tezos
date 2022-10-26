@@ -235,7 +235,7 @@ CLANGPATH is not set: clang will be used from PATH
 GCCPATH is not set: arm-none-eabi-* will be used from PATH
 Linker changed to CLANG
 rm -fr obj bin debug dep src/glyphs.c src/glyphs.h
-root@ba4e58af1ff9:/app# BOLOS_SDK=$NANOX_SDK APP=baking_app make
+root@ba4e58af1ff9:/app# BOLOS_SDK=$NANOX_SDK APP=tezos_baking make
 ```
 
 ### Installing the apps onto your Ledger device without Ledger Live
