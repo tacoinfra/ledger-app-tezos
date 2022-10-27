@@ -197,7 +197,6 @@ Follow the instructions at https://developers.ledger.com/docs/nano-app/build/ to
 To build the Tezos Wallet app:
 
 ```
-$ APP=tezos_wallet make
 $ docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
 root@be1d44cb0d36:/app# https://developers.ledger.com/docs/nano-app/build/^C
 root@be1d44cb0d36:/app# BOLOS_SDK=$NANOX_SDK make
